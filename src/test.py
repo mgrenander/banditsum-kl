@@ -175,7 +175,7 @@ if __name__ == "__main__":
 
     # Load vocab file
     with open(args.vocab_file, 'rb') as f:
-        vocab = pickle.load(f)
+        vocab = pickle.load(f, encoding='latin1')
 
     # Set up configs
     config(args, vocab)
