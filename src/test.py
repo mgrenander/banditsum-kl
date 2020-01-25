@@ -28,24 +28,25 @@ def make_summaries(args):
     # For counting positions
     pos_counts = defaultdict(int)
 
+    # Folder details
+    article_dir = os.path.join(args.data_dir, 'articles')
+
     logging.info("Starting evaluation.")
     try:
-        files = os.listdir(args.data_dir)
-
         with torch.no_grad():
-            for i, file in tqdm(enumerate(files), total=len(files)):
-                with open(file, 'r') as art_file:
+            for i in tqdm(range(len(os.listdir(article_dir)))):
+                article_name = str(i).rjust(6, '0') + "_article.txt"
+                with open(os.path.join(article_dir, article_name), 'r') as art_file:
                     doc_sents = process_text(corenlp_tokenizer, art_file)
-                    doc_ids = convert_tokens_to_ids(doc_sents)
+                    doc_ids = convert_tokens_to_ids(doc_sents, args)
 
                     # Write model hypothesis to file
                     summary_idx = model(doc_ids.cuda())
 
-                    hyp_file = 'hyp.' + str(i).rjust(5, '0') + '.txt'
+                    hyp_file = str(i).rjust(5, '0') + '_hypothesis.txt'
                     with open(os.path.join(args.hyp_dir, hyp_file), 'w') as f:
                         hyp_sents = [doc_sents[j] for j in summary_idx]
-                        f.write(" .\n".join(hyp_sents))
-                        f.write(" .")
+                        f.write("\n".join(hyp_sents))
 
                     for pos in summary_idx:
                         pos_counts[pos] += 1  # Count index selected
@@ -86,8 +87,8 @@ def write_rouge_scores(args):
     total_len = len(os.listdir(args.ref_dir))
     for i in tqdm(range(total_len)):
         # Copy file
-        model_filename = 'hyp.' + str(i).rjust(5, '0') + '.txt'
-        ref_filename = 'ref.' + str(i).rjust(5, '0') + '.txt'
+        model_filename = str(i).rjust(5, '0') + '_hypothesis.txt'
+        ref_filename = str(i).rjust(5, '0') + '_reference.txt'
         model_file = os.path.join(args.model_dir, model_filename)
         ref_file = os.path.join(args.ref_dir, ref_filename)
         dest_model_file = os.path.join(tmp_model_dir, model_filename)
@@ -99,8 +100,8 @@ def write_rouge_scores(args):
         rouge = Rouge155()
         rouge.system_dir = tmp_model_dir
         rouge.model_dir = tmp_ref_dir
-        rouge.system_filename_pattern = 'hyp.(\d+).txt'
-        rouge.model_filename_pattern = 'ref.#ID#.txt'
+        rouge.system_filename_pattern = '(\d+)_hypothesis.txt'
+        rouge.model_filename_pattern = '#ID#_reference.txt'
         output = rouge.convert_and_evaluate()
         output_scores = rouge.output_to_dict(output)
 
@@ -125,12 +126,12 @@ def write_rouge_scores(args):
 
     # Write to file
     for stat in signif_stats.keys():
-        with open(os.path.join(args.result_dir, "signif_{}.txt".format(stat)), 'w+') as f:
+        with open(os.path.join(args.data_dir, "signif_{}.txt".format(stat)), 'w+') as f:
             f.write("\n".join(signif_stats[stat]))
 
 
 def compute_rouge(args):
-    temp_dir = os.path.join(args.result_dir, 'temp-files')
+    temp_dir = 'temp-files'
     if os.path.exists(temp_dir): rmtree(temp_dir)
     os.mkdir(temp_dir)
     tempfile.tempdir = temp_dir
@@ -139,11 +140,11 @@ def compute_rouge(args):
     rouge = Rouge155()
     rouge.system_dir = args.hyp_dir
     rouge.model_dir = args.ref_dir
-    rouge.system_filename_pattern = 'hyp.(\d+).txt'
-    rouge.model_filename_pattern = 'ref.#ID#.txt'
+    rouge.system_filename_pattern = '(\d+)_hypothesis.txt'
+    rouge.model_filename_pattern = '#ID#_reference.txt'
     output = rouge.convert_and_evaluate()
     print(output)
-    with open(os.path.join(args.result_dir, 'rouge_results.txt'), 'w') as f:
+    with open(os.path.join(args.data_dir, 'rouge_results.txt'), 'w') as f:
         f.write(output)
 
     rmtree(temp_dir)
@@ -153,9 +154,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     # Folder details
-    parser.add_argument('--model_dir', type=str, default='../model/')
-    parser.add_argument('--model_file', type=str, default='')
-    parser.add_argument('--result_dir', default='../data/result')
+    parser.add_argument('--model_file', type=str, default='../model/banditsum_kl_model.pt')
     parser.add_argument('--data_dir', type=str, default='../data/test')
     parser.add_argument('--vocab_file', type=str, default='../data/vocab/vocab_100d.p')
 
@@ -182,16 +181,18 @@ if __name__ == "__main__":
     config(args, vocab)
 
     # Create directories if needed
-    args.ref_dir = os.path.join(args.result_dir, 'ref')
-    args.hyp_dir = os.path.join(args.result_dir, 'model')
-    if not os.path.exists(args.result_dir): os.mkdir(args.result_dir)
-    if not os.path.exists(args.ref_dir): os.mkdir(args.ref_dir)
+    args.ref_dir = os.path.join(args.data_dir, 'ref')
+    args.hyp_dir = os.path.join(args.data_dir, 'model')
+    args.article_dir = os.path.join(args.data_dir, 'articles')
+    if not os.path.exists(args.ref_dir): raise ValueError("Please create reference summary directory, named 'ref'.")
+    if not os.path.exists(args.article_dir): raise ValueError("Please create article directory, named 'articles'.")
     if not os.path.exists(args.hyp_dir): os.mkdir(args.hyp_dir)
 
-    if args.compute_rouge_only: compute_rouge(args)
+    if args.compute_rouge_only:
+        compute_rouge(args)
     elif args.write_rouge_scores:
-        args.ref_dir = os.path.join(args.result_dir, 'ref')
-        args.model_dir = os.path.join(args.result_dir, 'model')
+        args.ref_dir = os.path.join(args.data_dir, 'ref')
+        args.model_dir = os.path.join(args.data_dir, 'model')
         write_rouge_scores(args)
     else:
         make_summaries(args)
