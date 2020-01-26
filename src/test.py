@@ -37,7 +37,9 @@ def make_summaries(args):
             for i in tqdm(range(len(os.listdir(article_dir)))):
                 article_name = str(i).rjust(6, '0') + "_article.txt"
                 with open(os.path.join(article_dir, article_name), 'r') as art_file:
-                    doc_sents = process_text(corenlp_tokenizer, art_file)
+                    article_text = art_file.read()
+
+                    doc_sents = process_text(corenlp_tokenizer, article_text)
                     doc_ids = convert_tokens_to_ids(doc_sents, args)
 
                     # Write model hypothesis to file
@@ -54,7 +56,7 @@ def make_summaries(args):
         corenlp_tokenizer.stop()
 
     # Compute evaluation metrics
-    if args.compute_rouge:  compute_rouge(args)
+    compute_rouge(args)
 
     # Position counts
     total_count = sum(pos_counts.values())
