@@ -39,16 +39,18 @@ def make_summaries(args):
                 with open(os.path.join(article_dir, article_name), 'r') as art_file:
                     article_text = art_file.read()
 
-                    doc_sents = process_text(corenlp_tokenizer, article_text)
-                    doc_ids = convert_tokens_to_ids(doc_sents, args)
+                    doc_sents_words = process_text(corenlp_tokenizer, article_text)
+                    doc_ids = convert_tokens_to_ids(doc_sents_words, args)
 
                     # Write model hypothesis to file
                     summary_idx = model(doc_ids.cuda())
 
-                    hyp_file = str(i).rjust(5, '0') + '_hypothesis.txt'
+                    hyp_file = str(i).rjust(6, '0') + '_hypothesis.txt'
                     with open(os.path.join(args.hyp_dir, hyp_file), 'w') as f:
-                        hyp_sents = [doc_sents[j] for j in summary_idx]
-                        f.write("\n".join(hyp_sents))
+                        hyp_sents_words = [doc_sents_words[j] for j in summary_idx]
+                        hyp_sents = [" ".join(hyp_sent) for hyp_sent in hyp_sents_words]
+                        f.write(".\n".join(hyp_sents))
+                        f.write(" .")
 
                     for pos in summary_idx:
                         pos_counts[pos] += 1  # Count index selected
@@ -89,8 +91,8 @@ def write_rouge_scores(args):
     total_len = len(os.listdir(args.ref_dir))
     for i in tqdm(range(total_len)):
         # Copy file
-        model_filename = str(i).rjust(5, '0') + '_hypothesis.txt'
-        ref_filename = str(i).rjust(5, '0') + '_reference.txt'
+        model_filename = str(i).rjust(6, '0') + '_hypothesis.txt'
+        ref_filename = str(i).rjust(6, '0') + '_reference.txt'
         model_file = os.path.join(args.model_dir, model_filename)
         ref_file = os.path.join(args.ref_dir, ref_filename)
         dest_model_file = os.path.join(tmp_model_dir, model_filename)
