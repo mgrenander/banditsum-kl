@@ -73,9 +73,9 @@ def write_rouge_scores(args):
     logger.addHandler(l)
     logger.setLevel(logging.WARNING)
 
-    tmp_model_dir = os.path.join(args.result_dir, 'model_one')
-    tmp_ref_dir = os.path.join(args.result_dir, 'ref_one')
-    temp_dir = os.path.join(args.result_dir, 'temp-files')
+    tmp_model_dir = os.path.join(args.data_dir, 'model_one')
+    tmp_ref_dir = os.path.join(args.data_dir, 'ref_one')
+    temp_dir = os.path.join(args.data_dir, 'temp-files')
 
     if os.path.exists(tmp_model_dir): rmtree(tmp_model_dir)
     if os.path.exists(tmp_ref_dir): rmtree(tmp_ref_dir)
@@ -173,8 +173,8 @@ if __name__ == "__main__":
     parser.add_argument('--kl_weight', type=float, default=0.0095, help='Ignored if kl_method is none')
 
     # Testing details
-    parser.add_argument('--compute_rouge_only', action='store_true')
-    parser.add_argument('--write_rouge_scores', action='store_true')
+    parser.add_argument('--rouge_only', help='Only compute ROUGE scores, without writing summaries', action='store_true')
+    parser.add_argument('--ind_rouge_scores', help='Compute individual ROUGE scores for significance testing', action='store_true')
     args = parser.parse_args()
 
     # Load vocab file
@@ -193,11 +193,6 @@ if __name__ == "__main__":
     if not os.path.exists(args.article_dir): raise ValueError("Please create article directory, named 'articles'.")
     if not os.path.exists(args.hyp_dir): os.mkdir(args.hyp_dir)
 
-    if args.compute_rouge_only:
-        compute_rouge(args)
-    elif args.write_rouge_scores:
-        args.ref_dir = os.path.join(args.data_dir, 'ref')
-        args.model_dir = os.path.join(args.data_dir, 'model')
-        write_rouge_scores(args)
-    else:
-        make_summaries(args)
+    if args.rouge_only:  compute_rouge(args)
+    elif args.ind_rouge_scores:  write_rouge_scores(args)
+    else:  make_summaries(args)
