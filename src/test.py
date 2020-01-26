@@ -174,6 +174,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Load vocab file
+    logging.info("Opening vocab file: {}".format(args.vocab_file))
     with open(args.vocab_file, 'rb') as f:
         vocab = pickle.load(f, encoding='latin1')
 

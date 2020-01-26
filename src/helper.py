@@ -36,16 +36,16 @@ def convert_tokens_to_ids(doc, args):
 
 
 def config(args, vocab):
-    args.vocab_size = vocab.embedding.shape[0],
-    args.embedding_dim = vocab.embedding.shape[1],
-    args.position_size = 500,
-    args.position_dim = 50,
-    args.word_input_size = 100,
-    args.sent_input_size = 2 * args.hidden,
-    args.word_LSTM_hidden_units = args.hidden,
-    args.sent_LSTM_hidden_units = args.hidden,
-    args.pretrained_embedding = vocab.embedding,
-    args.word2id = vocab.w2i,
+    args.vocab_size = vocab.embedding.shape[0]
+    args.embedding_dim = vocab.embedding.shape[1]
+    args.position_size = 500
+    args.position_dim = 50
+    args.word_input_size = 100
+    args.sent_input_size = 2 * args.hidden
+    args.word_LSTM_hidden_units = args.hidden
+    args.sent_LSTM_hidden_units = args.hidden
+    args.pretrained_embedding = vocab.embedding
+    args.word2id = vocab.w2i
     args.id2word = vocab.i2w
 
 
