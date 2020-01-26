@@ -39,7 +39,7 @@ class ReinforceReward:
         self.update_data_instance(probs)
         if probs.view(-1).size(0) < self.max_num_sents:
             return np.array(list(range(probs.view(-1).size(0)))), 0
-        return self.compute_summary_index_and_loss("greedy")  # Just return indices so we can write
+        return self.compute_summary_index_and_loss("greedy")[0]  # Just return indices so we can write
 
     def update_data_instance(self, probs, doc_id=None):
         self.probs = torch.clamp(probs, 1e-6, 1 - 1e-6)  # Ensure probs are not 0 or 1
