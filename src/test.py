@@ -36,24 +36,34 @@ def make_summaries(args):
         with torch.no_grad():
             for i in tqdm(range(len(os.listdir(article_dir)))):
                 article_name = str(i).rjust(6, '0') + "_article.txt"
+                ref_name = str(i).rjust(6, '0') + "_reference.txt"
                 with open(os.path.join(article_dir, article_name), 'r') as art_file:
                     article_text = art_file.read()
 
-                    doc_sents_words = process_text(corenlp_tokenizer, article_text)
-                    doc_ids = convert_tokens_to_ids(doc_sents_words, args)
+                doc_sents_words = process_text(corenlp_tokenizer, article_text)
+                doc_ids = convert_tokens_to_ids(doc_sents_words, args)
 
-                    # Write model hypothesis to file
-                    summary_idx = model(doc_ids.cuda())
+                # Write model hypothesis to file
+                summary_idx = model(doc_ids.cuda())
 
-                    hyp_file = str(i).rjust(6, '0') + '_hypothesis.txt'
-                    with open(os.path.join(args.hyp_dir, hyp_file), 'w') as f:
-                        hyp_sents_words = [doc_sents_words[j] for j in summary_idx]
-                        hyp_sents = [" ".join(hyp_sent) for hyp_sent in hyp_sents_words]
-                        f.write(".\n".join(hyp_sents))
-                        f.write(" .")
+                hyp_file = str(i).rjust(6, '0') + '_hypothesis.txt'
+                with open(os.path.join(args.hyp_dir, hyp_file), 'w') as f:
+                    hyp_sents_words = [doc_sents_words[j] for j in summary_idx]
+                    hyp_sents = [" ".join(hyp_sent) for hyp_sent in hyp_sents_words]
+                    f.write(".\n".join(hyp_sents))
+                    f.write(" .")
 
-                    for pos in summary_idx:
-                        pos_counts[pos] += 1  # Count index selected
+                # Ensure reference file is similarly formatted for a fair comparison
+                with open(os.path.join(args.ref_dir, ref_name), 'r') as ref_file:
+                    ref_text = ref_file.read()
+                ref_sents_words = process_text(corenlp_tokenizer, ref_text)
+                with open(os.path.join(args.ref_dir, ref_name), 'w') as f:
+                    ref_sents = [" ".join(ref_sent) for ref_sent in ref_sents_words]
+                    f.write(".\n".join(ref_sents))
+                    f.write(" .")
+
+                for pos in summary_idx:
+                    pos_counts[pos] += 1  # Count index selected
     finally:
         corenlp_tokenizer.stop()
 
