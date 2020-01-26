@@ -18,9 +18,6 @@ class ReinforceReward:
 
         self.kl_method = config.kl_method
 
-        # Using official ROUGE or not
-        self.std_rouge = config.std_rouge
-
     def train(self, probs, doc_id):
         if self.kl_method == "none":
             self.update_data_instance(probs, doc_id)
