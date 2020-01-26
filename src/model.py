@@ -79,10 +79,8 @@ class SimpleRNN(nn.Module):
 
     def eval(self):
         super(SimpleRNN, self).eval()
-        self.training = True
         self.reinforce = self.reinforce_eval
 
     def train(self, mode=True):
         super(SimpleRNN, self).train(mode=mode)
-        self.training = False
         self.reinforce = self.reinforce_train
