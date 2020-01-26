@@ -93,7 +93,7 @@ def write_rouge_scores(args):
         # Copy file
         model_filename = str(i).rjust(6, '0') + '_hypothesis.txt'
         ref_filename = str(i).rjust(6, '0') + '_reference.txt'
-        model_file = os.path.join(args.model_dir, model_filename)
+        model_file = os.path.join(args.hyp_dir, model_filename)
         ref_file = os.path.join(args.ref_dir, ref_filename)
         dest_model_file = os.path.join(tmp_model_dir, model_filename)
         dest_ref_file = os.path.join(tmp_ref_dir, ref_filename)
