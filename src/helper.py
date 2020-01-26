@@ -68,9 +68,9 @@ class Vocab():
             self.i2w[self.count] = w
             self.count += 1
 
-    def add_embedding(self, gloveFile="../data/glove.6B/glove.6B.100d.txt", embed_size=100):
+    def add_embedding(self, glove_file="../data/glove.6B/glove.6B.100d.txt", embed_size=100):
         print("Loading Glove embeddings")
-        with open(gloveFile, 'r') as f:
+        with open(glove_file, 'r') as f:
             model = {}
             w_set = set(self.word_list)
             embedding_matrix = np.zeros(shape=(len(self.word_list), embed_size))
@@ -85,7 +85,7 @@ class Vocab():
                     if len(model) % 1000 == 0:
                         print("Processed {} data".format(len(model)))
         self.embedding = embedding_matrix
-        print("%d words out of %d has embeddings in the glove file".format((len(model), len(self.word_list))))
+        print("{} words out of {} has embeddings in the glove file".format(len(model), len(self.word_list)))
 
     def pickle_vocab(self, save_path="../data/vocab/vocab_100d.p"):
         with open(save_path, "wb") as f:
