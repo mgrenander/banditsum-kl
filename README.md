@@ -53,7 +53,7 @@ banditsum-kl
 |  |  |--vocab_100d.p
 ```
 
-## Running the model
+## Running the Model
 Required libraries:
 ```
 pyrouge
@@ -67,7 +67,7 @@ Running `python test.py` will start the model evaluation on the test set. The `m
 
 The results in this repository are _slightly_ different than reported in the paper, due to preprocessing differences.
 
-## Full training code
+## Full Training Code
 (Coming soon, link will be posted here)
 
 ## Questions?
