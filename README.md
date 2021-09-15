@@ -67,8 +67,5 @@ Running `python test.py` will start the model evaluation on the test set. The `m
 
 The results in this repository are _slightly_ different than reported in the paper, due to preprocessing differences.
 
-## Full Training Code
-(Coming soon, link will be posted here)
-
 ## Questions?
 Feel free to send me an email at matthew dot grenander at mail dot mcgill dot ca.
